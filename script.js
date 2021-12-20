@@ -9,11 +9,15 @@ const gameBoard = (() => {
   const playerX = Player('x');
   const playerO = Player('o');
 
+  document.querySelector('h1').textContent = `Player ${playerO.symbol.toUpperCase()}'s turn`;
+
   let rounds = 0;
   squares.forEach(square => square.addEventListener('click', () => {
     if(rounds % 2 != 0) {
+      document.querySelector('h1').textContent = `Player ${playerO.symbol.toUpperCase()}'s turn`;
       square.firstChild.textContent = playerX.symbol;
     } else {
+      document.querySelector('h1').textContent = `Player ${playerX.symbol.toUpperCase()}'s turn`;
       square.firstChild.textContent = playerO.symbol;
     }
     rounds++;
@@ -44,10 +48,10 @@ const gameBoard = (() => {
         alert(`${playerX.symbol} wins!`);
         location.reload();
       }, 100);
-    }
-
-    if(displayDraw(squares)) {
-      alert('it\'s a draw!');
+    } else if(displayDraw(squares)) {
+      setTimeout(function() {
+        alert('it\'s a draw!');
+      }, 100);
     }
 
   }))
