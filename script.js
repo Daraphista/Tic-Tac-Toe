@@ -1,11 +1,3 @@
-// create gameboard module
-// create player object using factory
-  // make each square fillable with player's symbol
-  // if square is already filled, remove all pointer events
-
-  // when line is created with symbols, display winner with popup
-  // when no lines are created, display draw with popup
-
 const gameBoard = (() => {
   const squares = Array.from(document.getElementsByClassName('square'));
   console.log(squares);
@@ -20,11 +12,13 @@ const gameBoard = (() => {
   let rounds = 0;
   squares.forEach(square => square.addEventListener('click', () => {
     if(rounds % 2 != 0) {
-      square.textContent = playerX.symbol;
+      square.firstChild.textContent = playerX.symbol;
     } else {
-      square.textContent = playerO.symbol;
+      square.firstChild.textContent = playerO.symbol;
     }
     rounds++;
+
+    square.style.pointerEvents = 'none';
 
     if(allChecked([0, 1, 2], playerO.symbol) 
     || allChecked([3, 4, 5], playerO.symbol) 
@@ -51,14 +45,27 @@ const gameBoard = (() => {
         location.reload();
       }, 100);
     }
+
+    if(displayDraw(squares)) {
+      alert('it\'s a draw!');
+    }
+
   }))
 
-  const allChecked = (winConditions, symbol) => {
-    return winConditions.every(
-      function(winConditions) {
-        return squares[winConditions].textContent === symbol;
-      }
-    )
-  }
+    const displayDraw = (squares) => {
+      return squares.every(
+        function(squares) {
+          return squares.firstChild.textContent !== '';
+        }
+      )
+    }
+
+    const allChecked = (winConditions, symbol) => {
+      return winConditions.every(
+        function(winConditions) {
+          return squares[winConditions].textContent === symbol;
+        }
+      )
+    }
 
 })();

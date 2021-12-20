@@ -1,6 +1,7 @@
 * {
   margin: 0;
   box-sizing: border-box;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 body {
@@ -8,18 +9,36 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  background-color: rgb(39, 39, 39);
 }
 
 .game-board {
-  border: black 1px solid;
+  aspect-ratio: 1/1;
   width: min(30rem, 90%);
-  height: min(30rem, 90%);
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 2%;
 }
 
 .square {
-  border: black 1px solid;
-  font-size: 4em;
+  position: relative;
+  max-height: 1fr;
+  color: red;
+  box-shadow: 0px 0px 6px black;
+  border-radius: 1rem;
+  box-sizing: border-box;
+  font-size: calc(3vw + 3vh)
+}
+
+.square:hover {
+  transform: scale(1.05);
+  cursor: pointer;
+}
+
+.square p {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
 }
