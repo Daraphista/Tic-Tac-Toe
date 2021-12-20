@@ -26,13 +26,6 @@ const gameBoard = (() => {
     }
     rounds++;
 
-    // const winConditions = [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8]]
-    // winConditions.forEach(condition => {
-    //   condition.forEach(square => console.log(squares[square].textContent == 'x'));
-    // });
-
-
-
     if(allChecked([0, 1, 2], playerO.symbol) 
     || allChecked([3, 4, 5], playerO.symbol) 
     || allChecked([6, 7, 8], playerO.symbol) 
@@ -41,7 +34,10 @@ const gameBoard = (() => {
     || allChecked([2, 5, 8], playerO.symbol)
     || allChecked([0, 4, 8], playerO.symbol)
     || allChecked([2, 4, 6], playerO.symbol)) {
-      setTimeout(function(){alert(`${playerO.symbol} wins!`)}, 100);
+      setTimeout(function() {
+        alert(`${playerO.symbol} wins!`);
+        location.reload();
+      }, 100);
     } else if(allChecked([0, 1, 2], playerX.symbol) 
     || allChecked([3, 4, 5], playerX.symbol) 
     || allChecked([6, 7, 8], playerX.symbol) 
@@ -50,7 +46,10 @@ const gameBoard = (() => {
     || allChecked([2, 5, 8], playerX.symbol)
     || allChecked([0, 4, 8], playerX.symbol)
     || allChecked([2, 4, 6], playerX.symbol)) {
-      setTimeout(function(){alert(`${playerX.symbol} wins!`)}, 100);
+      setTimeout(function() {
+        alert(`${playerX.symbol} wins!`);
+        location.reload();
+      }, 100);
     }
   }))
 

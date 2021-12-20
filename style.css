@@ -21,4 +21,5 @@ body {
 
 .square {
   border: black 1px solid;
+  font-size: 4em;
 }
