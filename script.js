@@ -1,80 +1,7 @@
 const gameBoard = (() => {
-  const squares = Array.from(document.getElementsByClassName('square'));
-  console.log(squares);
-  
+
   const Player = (symbol, isBot) => {
-    return { symbol, isBot };
-  }
-  
-  const playerX = Player('x', false);
-  const playerO = Player('o', true);
-
-  document.querySelector('h1').textContent = `Player ${playerX.symbol.toUpperCase()}'s turn`;
-  
-  const round = () => {
-    let moves = 0;
-    squares.forEach(square => {
-      square.addEventListener('click', () => {
-        // playerMove(square, moves);
-        playerVsBot(square, moves);
-      })
-      if(!square.firstChild.textContent === '') {
-        square.style.pointerEvents = 'none';
-      }
-    }
-    )
-
-  };
-
-    
-    const playerMove = (square, moves) => {    
-      if(moves  % 2 == 0) {
-        document.querySelector('h1').textContent = `Player ${playerO.symbol.toUpperCase()}'s turn`;
-        square.firstChild.textContent = playerX.symbol;
-        console.log('haha');
-      } else {
-        document.querySelector('h1').textContent = `Player ${playerX.symbol.toUpperCase()}'s turn`;
-        square.firstChild.textContent = playerO.symbol;
-      }
-      
-      square.style.pointerEvents = 'none';
-    }
-
-    const playerVsBot = (square, moves) => {
-      if(moves  % 2 == 0) {
-        document.querySelector('h1').textContent = `Player ${playerO.symbol.toUpperCase()}'s turn`;
-        square.firstChild.textContent = playerX.symbol;
-
-          compMove(squares, playerO.symbol);
-
-      } else {
-        document.querySelector('h1').textContent = `Player ${playerX.symbol.toUpperCase()}'s turn`;
-      }
-      moves++;
-      square.style.pointerEvents = 'none';
-      displayResult();
-    }
-    
-    const displayResult = () => {
-      if(checkWin(playerO.symbol)) {
-        setTimeout(function() {
-          alert(`${playerO.symbol} wins!`);
-          location.reload();
-        }, 20);
-      } else if(checkWin(playerX.symbol)) {
-        setTimeout(function() {
-          alert(`${playerX.symbol} wins!`);
-          location.reload();
-        }, 20);
-      } else if(checkDraw(squares)) {
-        setTimeout(function() {
-          alert('it\'s a draw!');
-          location.reload();
-        }, 20);
-      }
-    }
-    
-    const checkWin = (symbol) => {
+    const isWinner = () => {
       if(allChecked([0, 1, 2], symbol) 
       || allChecked([3, 4, 5], symbol) 
       || allChecked([6, 7, 8], symbol) 
@@ -88,35 +15,80 @@ const gameBoard = (() => {
         return false
       }
     }
-    
-    const checkDraw = (squares) => {
-      return squares.every(
-        function(squares) {
-          return squares.firstChild.textContent !== '';
-        }
-        )
-      }
-      
-    const allChecked = (square, symbol) => {
-      return square.every(
-        function(square) {
-          return squares[square].textContent === symbol;
-        }
-        )
-      }
+    return { symbol, isBot, isWinner };
+  }
 
-    const compMove = (squares, symbol) => {
-      let square = Math.floor(Math.random() * 10);
-      console.log(squares[square].firstChild.textContent === '');
-      console.log(square);
-      if(squares[square].firstChild.textContent === '') {
-        squares[square].firstChild.textContent = symbol;
-        squares[square].style.pointerEvents = 'none';
-      } else {
-        compMove(squares, symbol);
-      }
+  const playerX = Player('x', true);
+  const playerO = Player('o', true);
+
+  moves = 0;
+  window.addEventListener('click', () => {
+    round(moves);
+    moves++;
+    console.log(playerO.isWinner());
+    displayResult();
+  })
+  
+  const squareArray = ['', '', '', '', '', '', '', '', ''];
+  const squarePhysical = Array.from(document.querySelectorAll('.square'))
+  
+  function round(moves) {
+    if(moves % 2 == 0) {
+      compMove(squareArray, 'x');
+    } else {
+      compMove(squareArray, 'o');
     }
-        
-  round();
+    displayMoves(squarePhysical, squareArray);
+  }
+  
+  function displayMoves(squarePhysical, squareArray) {
+    for(i = 0; i < 9; i++) {
+      squarePhysical[i].firstChild.textContent = squareArray[i];
+    }
+  }
+  
+  function compMove(squares, symbol) {
+    let index = Math.floor(Math.random() * 10)
+    if (squares[index] === '') {
+      squares[index] = symbol;
+    } else {
+      compMove(squares, symbol);
+    }
+  }
+  
+  function allChecked(winConditions, symbol) {
+    return winConditions.every(
+      function(winConditions) {
+        return squarePhysical[winConditions].firstChild.textContent === symbol;
+      }
+      )
+    }  
+    
+  function isDraw(squares) {
+    return squares.every(
+      function(square) {
+        return square !== ''
+      }
+      )
+    }
+    
+  function displayResult() {
+    if(playerX.isWinner()) {
+      setTimeout(function() {
+        alert('X wins!');
+        location.reload();
+      }, 20);
+    } else if(playerO.isWinner()) {
+      setTimeout(function() {
+        alert('O wins!');
+        location.reload();
+      }, 20);
+    } else if(isDraw(squareArray)) {
+      setTimeout(function() {
+        alert('It\'s a draw!');
+        location.reload();
+      }, 20);
+    }
+  }
 
 })();
