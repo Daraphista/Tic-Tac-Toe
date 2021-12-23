@@ -56,7 +56,6 @@ const Gameboard = (() => {
       }
 
       boardValues[bestRow][bestCol] = symbol;
-      console.log(bestCol, bestRow);
     };
     const _minimax = (boardValues, depth, isMax, playerSymbol, opponentSymbol) => {
 
@@ -101,13 +100,29 @@ const Gameboard = (() => {
     return { easyBotMove, hardBotMove, symbol };
   }
   const Player = (symbol) => {
-    const playerMove = () => {};
+    const playerMove = (squareClicked) => {
+      if(squareClicked.classList.contains('row0')) {
+        boardValues[0][physicalBoard[0].indexOf(squareClicked)] = symbol;
+        updatePhysicalBoard();
+      } else if(squareClicked.classList.contains('row1')) {
+        boardValues[1][physicalBoard[1].indexOf(squareClicked)] = symbol;
+        updatePhysicalBoard();
+      } else if(squareClicked.classList.contains('row2')) {
+        boardValues[2][physicalBoard[2].indexOf(squareClicked)] = symbol;
+        updatePhysicalBoard();
+      }
+    };
+
+    return { playerMove };
   }
 
   const updatePhysicalBoard = () => {
     for(i = 0; i < 3; i++) {
       for(j = 0; j < 3; j++) {
         physicalBoard[i][j].firstChild.textContent = boardValues[i][j];
+        if(boardValues[i][j] != '') {
+          physicalBoard[i][j].style.pointerEvents = 'none';
+        }
       }
     }
   }
@@ -164,20 +179,31 @@ const Gameboard = (() => {
 
   const botX = Robot('x');
   const botO = Robot('o');
+  const playerX = Player('x');
+  const playerO = Player('o');
 
-  let moves = 0
-
-  window.addEventListener('click', () => {
+  let moves = 0;
+  window.addEventListener('click', (e) => {
     if(moves % 2 == 0) {
-      // botX.easyBotMove();
-      botX.hardBotMove();
+      playerX.playerMove(e.target);
     } else {
-      // botO.easyBotMove();
-      botO.hardBotMove();
+      playerO.playerMove(e.target);
     }
-    moves++;
     setTimeout(() => {displayResults(botX.symbol, botO.symbol)}, 20)
-    updatePhysicalBoard();
+    if(e.target.classList.contains('square')) {moves++;}
   })
+
+  // window.addEventListener('click', () => {
+  //   if(moves % 2 == 0) {
+  //     // botX.easyBotMove();
+  //     botX.hardBotMove();
+  //   } else {
+  //     // botO.easyBotMove();
+  //     botO.hardBotMove();
+  //   }
+  //   moves++;
+  //   setTimeout(() => {displayResults(botX.symbol, botO.symbol)}, 20)
+  //   updatePhysicalBoard();
+  // })
 
 })();
