@@ -2,7 +2,7 @@ const Gameboard = (() => {
   const physicalBoard = [
     Array.from(document.querySelectorAll('.row0')),
     Array.from(document.querySelectorAll('.row1')),
-    Array.from(document.querySelectorAll('.row2')), 
+    Array.from(document.querySelectorAll('.row2')),
   ];
   const getboardValues = () => {
     const boardValues = [[],[],[]]
@@ -14,7 +14,7 @@ const Gameboard = (() => {
     return boardValues;
   }
   const boardValues = getboardValues();
-  
+
   const Robot = (symbol) => {
     const easyBotMove = () => {
       let row = Math.floor(Math.random() * 3);
@@ -27,7 +27,10 @@ const Gameboard = (() => {
       }
     };
     const hardBotMove = () => {
-      let bestVal = -999;
+      let bestVal;
+      bestVal = (symbol == 'x') ? 999 : -999;
+      const isMax = (symbol == 'x') ? true : false;
+
       let bestRow = -1;
       let bestCol = -1;
 
@@ -35,11 +38,15 @@ const Gameboard = (() => {
         for(j = 0; j < 3; j++) {
           if(boardValues[i][j] == '') {
             boardValues[i][j] = symbol;
-            let moveVal = _minimax(boardValues, 0, false, this, botX);
+            let moveVal = _minimax(boardValues, 0, isMax, 'o', 'x' );
             boardValues[i][j] = '';
-            console.log(moveVal);
 
-            if(moveVal > bestVal) {
+            if(moveVal > bestVal && symbol != 'x') {
+              bestVal = moveVal;
+              bestRow = i;
+              bestCol = j;
+            } 
+            if(moveVal < bestVal && symbol == 'x') {
               bestVal = moveVal;
               bestRow = i;
               bestCol = j;
@@ -47,13 +54,13 @@ const Gameboard = (() => {
           }
         }
       }
-      
+
       boardValues[bestRow][bestCol] = symbol;
       console.log(bestCol, bestRow);
     };
-    const _minimax = (boardValues, depth, isMax, player, opponent) => {
+    const _minimax = (boardValues, depth, isMax, playerSymbol, opponentSymbol) => {
 
-      let score = evaluateWinner(botO.symbol, botX.symbol)
+      let score = evaluateWinner(playerSymbol, opponentSymbol)
 
       if(score == 10) {
         return score;
@@ -67,35 +74,30 @@ const Gameboard = (() => {
 
       if(isMax) {
         let best = -999;
-
         for(let i = 0; i < 3; i++) {
           for(let j = 0; j < 3; j++) {
             if(boardValues[i][j] == '') {
-              boardValues[i][j] = 'o';
-              best = Math.max(best, _minimax(boardValues, depth + 1, !isMax));
+              boardValues[i][j] = playerSymbol;
+              best = Math.max(best, _minimax(boardValues, depth + 1, false, playerSymbol, opponentSymbol));
               boardValues[i][j] = '';
             }
           }
         }
-
         return best;
       } else {
         let best = 999;
-
         for(let i = 0; i < 3; i++) {
           for(let j = 0; j < 3; j++) {
             if(boardValues[i][j] == '') {
-              boardValues[i][j] = 'x';
-              best = Math.min(best, _minimax(boardValues, depth + 1, true));
+              boardValues[i][j] = opponentSymbol;
+              best = Math.min(best, _minimax(boardValues, depth + 1, true, playerSymbol, opponentSymbol));
               boardValues[i][j] = '';
             }
           }
         }
-
         return best;
       }
     }
-
     return { easyBotMove, hardBotMove, symbol };
   }
   const Player = (symbol) => {
@@ -109,12 +111,12 @@ const Gameboard = (() => {
       }
     }
   }
-  const evaluateWinner = (player, opponent) => {
+  const evaluateWinner = (playerSymbol, opponentSymbol) => {
     for(let row = 0; row < 3; row++) {
       if(boardValues[row][0] == boardValues[row][1] && boardValues[row][1] == boardValues[row][2]) {
-        if(boardValues[row][0] == player) {
+        if(boardValues[row][0] == playerSymbol) {
           return +10;
-        } else if(boardValues[row][0] == opponent) {
+        } else if(boardValues[row][0] == opponentSymbol) {
           return -10;
         }
       }
@@ -122,37 +124,37 @@ const Gameboard = (() => {
 
     for(let col = 0; col < 3; col++) {
       if(boardValues[0][col] == boardValues[1][col] && boardValues[1][col] == boardValues[2][col]) {
-        if(boardValues[0][col] == player) {
+        if(boardValues[0][col] == playerSymbol) {
           return +10;
-        } else if(boardValues[0][col] == opponent) {
+        } else if(boardValues[0][col] == opponentSymbol) {
           return -10;
         }
       }
     }
 
     if(boardValues[0][0] == boardValues[1][1] && boardValues[1][1] == boardValues[2][2]) {
-      if(boardValues[0][0] == player) {
+      if(boardValues[0][0] == playerSymbol) {
         return +10;
-      } else if(boardValues[0][0] == opponent) {
+      } else if(boardValues[0][0] == opponentSymbol) {
         return -10;
       }
     }
     if(boardValues[0][2] == boardValues[1][1] && boardValues[1][1] == boardValues[2][0]) {
-      if(boardValues[0][2] == player) {
+      if(boardValues[0][2] == playerSymbol) {
         return +10;
-      } else if(boardValues[2][0] == opponent) {
+      } else if(boardValues[2][0] == opponentSymbol) {
         return -10;
       }
     }
 
     return 0;
   }
-  const displayResults = (player, opponent) => {
-    if(evaluateWinner(botX.symbol, botO.symbol) == 10) {
-      alert(`omg nanalo si X`);
+  const displayResults = (playerSymbol, opponentSymbol) => {
+    if(evaluateWinner(playerSymbol, opponentSymbol) == 10) {
+      alert(`omg nanalo si ${playerSymbol}`);
       location.reload();
-    } else if(evaluateWinner(botX.symbol, botO.symbol) == -10) {
-      alert(`omg nanalo si O`);
+    } else if(evaluateWinner(playerSymbol, opponentSymbol) == -10) {
+      alert(`omg nanalo si ${opponentSymbol}`);
       location.reload();
     } else if(boardValues.every(row => row.every(square => square !== ''))) {
       alert(`omg it's a draw`);
@@ -167,13 +169,14 @@ const Gameboard = (() => {
 
   window.addEventListener('click', () => {
     if(moves % 2 == 0) {
-      botX.easyBotMove();
+      // botX.easyBotMove();
+      botX.hardBotMove();
     } else {
       // botO.easyBotMove();
       botO.hardBotMove();
     }
     moves++;
-    setTimeout(() => {displayResults(botX, botO)}, 20)
+    setTimeout(() => {displayResults(botX.symbol, botO.symbol)}, 20)
     updatePhysicalBoard();
   })
 
