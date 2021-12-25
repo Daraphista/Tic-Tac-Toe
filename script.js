@@ -78,8 +78,8 @@ const Gameboard = (() => {
   let selectedOption;
   let selection = 'Player';
   const dropUps = Array.from(document.querySelectorAll('.dropup'));
+  const selectionMenus = Array.from(document.querySelectorAll('.player'));
   window.addEventListener('click', (e) => {
-    const selectionMenus = Array.from(document.querySelectorAll('.player'));
     selectionMenus.forEach(selectionMenu => {
       if(e.target.parentNode == selectionMenu || e.target.parentNode.parentNode == selectionMenu) {
         selectedOption = selectionMenu.firstElementChild;
@@ -105,14 +105,18 @@ const Gameboard = (() => {
   })
   
   const Robot = (symbol) => {
-    const easyBotMove = () => {
-      let row = Math.floor(Math.random() * 3);
-      let col = Math.floor(Math.random() * 3);
+    const easyBotMove = (squareClicked) => {
+      if(squareClicked.classList.contains('square')) {
+        let row = Math.floor(Math.random() * 3);
+        let col = Math.floor(Math.random() * 3);
 
-      if(boardValues[row][col] == '') {
-        boardValues[row][col] = symbol;
-      } else {
-        easyBotMove();
+        if(boardValues[row][col] == '') {
+          boardValues[row][col] = symbol;
+          console.log(row, col, boardValues[row][col])
+          updatePhysicalBoard();
+        } else {
+          easyBotMove(squareClicked);
+        }
       }
     };
     const hardBotMove = () => {
@@ -202,22 +206,53 @@ const Gameboard = (() => {
       }
     };
 
-    return { playerMove };
+    return { playerMove, symbol };
   }
 
   const playerX = document.querySelector('.player.x .selected');
   const playerO = document.querySelector('.player.o .selected');
 
-  window.addEventListener('click', () => {
+  const playerVsPlayer = () => {
+    const playerX = Player('x');
+    const playerO = Player('o');
+    
+    let moves = 0;
+    window.addEventListener('click', (e) => {
+      if(moves % 2 == 0) {
+        playerX.playerMove(e.target);
+      } else {
+        playerO.playerMove(e.target);
+      }
+      setTimeout(() => {displayResults(playerX.symbol, playerO.symbol)}, 20)
+      if(e.target.classList.contains('square')) {moves++;}
+    })
+  }
+  const playerVsBot = (firstPlayer, difficulty) => {
+    if(firstPlayer == 'player' && difficulty == 'easy') {
+      const playerX = Player('x');
+      const playerO = Robot('o');
+
+      window.addEventListener('click', (e) => {
+        playerX.playerMove(e.target);
+        playerO.easyBotMove(e.target);
+        setTimeout(() => {displayResults(playerX.symbol, playerO.symbol)}, 20)
+      })
+    }
+  }
+
+  if(localStorage.getItem('gamemode') == 'PvB') {
+    playerVsBot('player', 'easy');
+  }
+
+  selectionMenus.forEach(selectionMenu => selectionMenu.addEventListener('click', () => {
     if(playerX.textContent.indexOf('Player') !== -1 && playerO.textContent.indexOf('Player') !== -1) {
-      console.log('PvP');
     } else if(playerX.textContent.indexOf('Player') !== -1 && playerO.textContent.indexOf('Bot') !== -1) {
-      console.log('PvB');
+
     } else if(playerX.textContent.indexOf('Bot') !== -1 && playerO.textContent.indexOf('Player') !== -1) {
       console.log('BvP');
     } else if (playerX.textContent.indexOf('Bot') !== -1 && playerO.textContent.indexOf('Bot') !== -1) {
       console.log('BvB');
     }
+  }))
 
-  })
 })();
