@@ -75,38 +75,44 @@ const Gameboard = (() => {
     }
   }
 
-  let selectedOption;
-  let selection = 'Player';
-  const dropUps = Array.from(document.querySelectorAll('.dropup'));
-  const selectionMenus = Array.from(document.querySelectorAll('.player'));
-  window.addEventListener('click', (e) => {
-    selectionMenus.forEach(selectionMenu => {
-      if(e.target.parentNode == selectionMenu || e.target.parentNode.parentNode == selectionMenu) {
-        selectedOption = selectionMenu.firstElementChild;
-        selectionMenu.classList.toggle('active');
-      } else {
-        selectionMenu.classList.remove('active');
-      }
-      dropUps.forEach(dropUp => {
-        if(e.target.parentNode == dropUp) {
-          selection = e.target.textContent;
+  const playerSelection = (() => {
+    const playerXMenu = document.querySelector('.player.x');
+    const playerOMenu = document.querySelector('.player.o');
+
+    const functionality = (playerMenu) => {
+      const playerMenuSymbol = Array.from(playerMenu.classList)[1]
+      let selection = localStorage.getItem(`${playerMenuSymbol}selection`) ? localStorage.getItem(`${playerMenuSymbol}selection`) : 'Player';
+      const selected = playerMenu.firstElementChild.firstElementChild;
+      selected.textContent = selection;
+
+      playerMenu.addEventListener('click', (e) => {
+        playerMenu.classList.toggle('active');
+        if(e.target.parentNode.classList.contains('dropup')) {
+          localStorage.setItem(`${playerMenuSymbol}selection`, e.target.textContent);
+          location.reload();
         }
       })
-    })
-  })
-  window.addEventListener('mouseover', (e) => {
-    dropUps.forEach(dropUp => {
-      if(e.target.parentNode == dropUp) {
-        selectedOption.firstElementChild.textContent = e.target.textContent;    
-      } else {
-        selectedOption.firstElementChild.textContent = selection;
-      }
-    })
-  })
+      window.addEventListener('click', (e) => {
+        if(e.target.parentNode !== playerMenu 
+        && e.target.parentNode.parentNode !== playerMenu) {
+          playerMenu.classList.remove('active');
+        }
+      })
+      playerMenu.addEventListener('mouseover', (e) => {
+        if(e.target.parentNode.classList.contains('dropup')) {
+          selected.textContent = e.target.textContent;
+        } else {
+          selected.textContent = selection;
+        }
+      })
+    }
+
+    functionality(playerXMenu);
+    functionality(playerOMenu);
+  })();
   
   const Robot = (symbol) => {
-    const easyBotMove = (squareClicked) => {
-      if(squareClicked.classList.contains('square')) {
+    const easyBotMove = () => {
         let row = Math.floor(Math.random() * 3);
         let col = Math.floor(Math.random() * 3);
 
@@ -115,9 +121,8 @@ const Gameboard = (() => {
           console.log(row, col, boardValues[row][col])
           updatePhysicalBoard();
         } else {
-          easyBotMove(squareClicked);
+          easyBotMove();
         }
-      }
     };
     const hardBotMove = () => {
       let bestVal;
@@ -149,6 +154,7 @@ const Gameboard = (() => {
       }
 
       boardValues[bestRow][bestCol] = symbol;
+      updatePhysicalBoard();
     };
     const _minimax = (boardValues, depth, isMax, playerSymbol, opponentSymbol) => {
 
@@ -209,8 +215,8 @@ const Gameboard = (() => {
     return { playerMove, symbol };
   }
 
-  const playerX = document.querySelector('.player.x .selected');
-  const playerO = document.querySelector('.player.o .selected');
+  const playerXSelection = localStorage.getItem('xselection');
+  const playerOSelection = localStorage.getItem('oselection');
 
   const playerVsPlayer = () => {
     const playerX = Player('x');
@@ -227,32 +233,85 @@ const Gameboard = (() => {
       if(e.target.classList.contains('square')) {moves++;}
     })
   }
-  const playerVsBot = (firstPlayer, difficulty) => {
-    if(firstPlayer == 'player' && difficulty == 'easy') {
+  const playerVsBot = (firstPlayer, bot) => {
+    if(firstPlayer == 'player') {
       const playerX = Player('x');
       const playerO = Robot('o');
 
       window.addEventListener('click', (e) => {
-        playerX.playerMove(e.target);
-        playerO.easyBotMove(e.target);
-        setTimeout(() => {displayResults(playerX.symbol, playerO.symbol)}, 20)
+        if(e.target.classList.contains('square')) { 
+          setTimeout(() => {displayResults(playerX.symbol, playerO.symbol)}, 20);
+          playerX.playerMove(e.target);
+          if(bot.indexOf('Hard') !== -1) {playerO.hardBotMove()}
+          if(bot.indexOf('Easy') !== -1) {playerO.easyBotMove()}
+        }
+      })
+    } else if(firstPlayer == 'bot') {
+      const playerX = Robot('x');
+      const playerO = Player('o');
+
+      window.addEventListener('load', () => {
+        playerX.easyBotMove();
+      })
+      window.addEventListener('click', (e) => {
+        if(e.target.classList.contains('square')) { 
+          playerO.playerMove(e.target);
+          setTimeout(() => {displayResults(playerX.symbol, playerO.symbol)}, 20);
+          if(bot.indexOf('Hard') !== -1) {playerX.hardBotMove()}
+          if(bot.indexOf('Easy') !== -1) {playerX.easyBotMove()}
+        }
       })
     }
   }
-
-  if(localStorage.getItem('gamemode') == 'PvB') {
-    playerVsBot('player', 'easy');
+  const botVsBot = (botX, botO) => {
+    const playerX = Robot('x');
+    const playerO = Robot('o');
+    window.addEventListener('load', () => {
+      for(i = 1; i <= 9; i++) {
+        if(i % 2 !== 0) {
+          setTimeout(() => {
+            if(evaluateWinner(playerX.symbol, playerO.symbol) == 0) {
+              if(botX.indexOf('Hard') !== -1) {playerX.hardBotMove()}
+              if(botX.indexOf('Easy') !== -1) {playerX.easyBotMove()}
+              setTimeout(() => {displayResults(playerX.symbol, playerO.symbol)}, 20)
+            }
+          }, i*1000)
+        } else {
+          setTimeout(() => {
+            if(evaluateWinner(playerX.symbol, playerO.symbol) == 0) {
+              if(botO.indexOf('Hard') !== -1) {playerO.hardBotMove()}
+              if(botO.indexOf('Easy') !== -1) {playerO.easyBotMove()}
+              setTimeout(() => {displayResults(playerX.symbol, playerO.symbol)}, 20)
+            }
+          }, i*1000)
+        }
+      }
+    })
+  }
+  
+  if(playerXSelection == 'Player' && playerOSelection == 'Player') {
+    console.log('PvP')
+    playerVsPlayer();
+  } else if(playerXSelection == 'Player' && playerOSelection.indexOf('Bot') !== -1) {
+    console.log('PvE');
+    playerVsBot('player', playerOSelection);
+  } else if(playerXSelection.indexOf('Bot') !== -1 && playerOSelection.indexOf('Player') !== -1) {
+    playerVsBot('bot', playerXSelection)
+  } else if(playerXSelection.indexOf('Bot') !== -1 && playerOSelection.indexOf('Bot') !== -1) {
+    console.log('EvE');
+    botVsBot(playerXSelection, playerOSelection);
   }
 
-  selectionMenus.forEach(selectionMenu => selectionMenu.addEventListener('click', () => {
-    if(playerX.textContent.indexOf('Player') !== -1 && playerO.textContent.indexOf('Player') !== -1) {
-    } else if(playerX.textContent.indexOf('Player') !== -1 && playerO.textContent.indexOf('Bot') !== -1) {
-
-    } else if(playerX.textContent.indexOf('Bot') !== -1 && playerO.textContent.indexOf('Player') !== -1) {
-      console.log('BvP');
-    } else if (playerX.textContent.indexOf('Bot') !== -1 && playerO.textContent.indexOf('Bot') !== -1) {
-      console.log('BvB');
-    }
-  }))
-
-})();
+  // let moves = 0;
+  // window.addEventListener('click', (e) => {
+    //   console.log(moves)
+    //   if(moves % 2 == 0) {
+      //     playerX.easyBotMove();
+      //   } else {
+        //     playerO.hardBotMove();
+        //   }
+        //   moves++;
+        //   // setTimeout(() => {displayResults(playerX.symbol, playerO.symbol)}, 20)
+        // })
+    
+  })();
