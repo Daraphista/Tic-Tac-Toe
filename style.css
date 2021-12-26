@@ -127,3 +127,22 @@ body {
     transform: scaleY(1);
   }
 }
+
+/* FOOTER */
+.footer{
+  position: absolute;
+  bottom: 1.5rem;
+  font-size: 1.5em;
+}
+
+.footer * {
+  color: #646464;
+  text-decoration: none;
+  transition: 100ms;
+}
+
+.footer a:hover {
+  font-size: 1.75rem;
+  cursor: pointer;
+  color: white;
+}
