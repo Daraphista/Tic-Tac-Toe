@@ -215,8 +215,8 @@ const Gameboard = (() => {
     return { playerMove, symbol };
   }
 
-  const playerXSelection = localStorage.getItem('xselection');
-  const playerOSelection = localStorage.getItem('oselection');
+  let playerXSelection = localStorage.getItem('xselection') ? localStorage.getItem(`xselection`) : 'Player';
+  let playerOSelection = localStorage.getItem('oselection') ? localStorage.getItem(`oselection`) : 'Player';
 
   const playerVsPlayer = () => {
     const playerX = Player('x');
@@ -300,18 +300,5 @@ const Gameboard = (() => {
   } else if(playerXSelection.indexOf('Bot') !== -1 && playerOSelection.indexOf('Bot') !== -1) {
     console.log('EvE');
     botVsBot(playerXSelection, playerOSelection);
-  }
-
-  // let moves = 0;
-  // window.addEventListener('click', (e) => {
-    //   console.log(moves)
-    //   if(moves % 2 == 0) {
-      //     playerX.easyBotMove();
-      //   } else {
-        //     playerO.hardBotMove();
-        //   }
-        //   moves++;
-        //   // setTimeout(() => {displayResults(playerX.symbol, playerO.symbol)}, 20)
-        // })
-    
-  })();
+  }    
+})();
